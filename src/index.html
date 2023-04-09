@@ -16,18 +16,22 @@
   <body>
     <section class="gallery-section">
       <div class="container">
-        <form class="search-form" id="search-form">
-          <input
-            type="text"
-            class="search-input"
-            name="searchQuery"
-            autocomplete="off"
-            placeholder="Search images..."
-          />
-          <button type="submit" class="search-btn">Search</button>
-        </form>
-        <div class="gallery">
-          <!-- Картки зображень -->
+        <div class="form">
+          <form class="search-form" id="search-form">
+            <input
+              type="text"
+              class="search-input"
+              name="searchQuery"
+              autocomplete="off"
+              placeholder="Search images..."
+            />
+            <button type="submit" class="search-btn">Search</button>
+          </form>
+        </div>
+        <div class="gallery-container">
+          <div class="gallery">
+            <!-- Картки зображень -->
+          </div>
         </div>
         <button type="button" class="load-more is-hidden">Load more</button>
       </div>

@@ -14,7 +14,7 @@ const galleryListEl = document.querySelector('.gallery');
 
 const pixabayAPI = new PixabayAPI();
 
-const handleSearchFormSubmit = event => {
+const handleSearchFormSubmit = async event => {
     event.preventDefault();
 
     if (searchInputEl.value === '') {
@@ -26,14 +26,20 @@ const handleSearchFormSubmit = event => {
     searchInputEl.value = '';
 
     pixabayAPI.page = 1;
-  
-    pixabayAPI.fetchImages().then(data => {
+
+    try {
+     const { data } = await pixabayAPI.fetchImages()
+    
+     
         console.log(data);
-        if (!data.hits.length) {
+        if (!data.hits.length) {            
+            loadMoreBtnEl.classList.add('is-hidden');
             Notiflix.Notify.failure('Sorry, there are no images matching your search query. Please try again.');
+            galleryListEl.innerHTML = '';            
           return;
-        }
-        
+        } 
+        Notiflix.Notify.info(`Hooray! We found ${data.totalHits} images.`);
+        pixabayAPI.page = 1;
         const markup = data.hits.map(({webformatURL, largeImageURL, tags, likes, views, comments, downloads}) => {
             return `<div class="photo-card">
             <a class="gallery__item" href="${largeImageURL}">
@@ -41,45 +47,52 @@ const handleSearchFormSubmit = event => {
             </a>
             <div class="info">
               <p class="info-item">
-                <b>Likes:</b> ${likes}
+                <b>Likes</b> ${likes}
               </p>
               <p class="info-item">
-                <b>Views:</b> ${views}
+                <b>Views</b> ${views}
               </p>
               <p class="info-item">
-                <b>Comments:</b> ${comments}
+                <b>Comments</b> ${comments}
               </p>
               <p class="info-item">
-                <b>Downloads:</b> ${downloads}
+                <b>Downloads</b> ${downloads}
               </p>
             </div>
           </div>`}).join('');
 
         galleryListEl.innerHTML = markup; 
-
+        
         var lightbox = new SimpleLightbox('.gallery a', {
-          captionSelector: 'img',
-          captionsData: 'alt',
-          captionPosition: 'bottom',
-          captionDelay: 250,
+          // captionSelector: 'img',
+          // captionsData: 'alt',
+          // captionPosition: 'bottom',
+          // captionDelay: 250,
           scrollZoom: false, 
         });
-
+        lightbox.refresh();
         loadMoreBtnEl.classList.remove('is-hidden');
-      })
-      .catch(err => {
+        if (pixabayAPI.count >= data.totalHits) {
+          loadMoreBtnEl.classList.add('is-hidden');         
+          return;
+        }
+      }
+      catch (err) {
         console.log(err);
-      });
+      }
 };
 
-const handleLoadMoreBtnClick = () => {
+const handleLoadMoreBtnClick = async () => {
     pixabayAPI.page += 1;
   
-    pixabayAPI.fetchImages().then(data => {
+    try {
+    const { data } = await pixabayAPI.fetchImages();
+    
         console.log(data);
-        if (pixabayAPI.page * pixabayAPI.count >= data.totalHits) {
+        if ((pixabayAPI.page - 1) * pixabayAPI.count >= data.totalHits) {
           loadMoreBtnEl.classList.add('is-hidden');
-          return Notiflix.Notify.info('We are sorry, but you have reached the end of search results.');
+          Notiflix.Notify.info('We are sorry, but you have reached the end of search results.');
+          return;
         }
         const markup = data.hits.map(({webformatURL, largeImageURL, tags, likes, views, comments, downloads}) => {
             return `<div class="photo-card">
@@ -88,16 +101,16 @@ const handleLoadMoreBtnClick = () => {
             </a>
             <div class="info">
               <p class="info-item">
-                <b>Likes:</b> ${likes}
+                <b>Likes</b> ${likes}
               </p>
               <p class="info-item">
-                <b>Views:</b> ${views}
+                <b>Views</b> ${views}
               </p>
               <p class="info-item">
-                <b>Comments:</b> ${comments}
+                <b>Comments</b> ${comments}
               </p>
               <p class="info-item">
-                <b>Downloads:</b> ${downloads}
+                <b>Downloads</b> ${downloads}
               </p>
             </div>
           </div>`}).join('');
@@ -106,16 +119,16 @@ const handleLoadMoreBtnClick = () => {
           markup
         );
         var lightbox = new SimpleLightbox('.gallery a', {
-          captionSelector: 'img',
-          captionsData: 'alt',
-          captionPosition: 'bottom',
-          captionDelay: 250,
+          // captionSelector: 'img',
+          // captionsData: 'alt',
+          // captionPosition: 'bottom',
+          // captionDelay: 250,
           scrollZoom: false, 
         });
-      })
-      .catch(err => {
+      }
+      catch (err) {
         console.log(err);
-      });
+      }
   };
   
   searchFormEl.addEventListener('submit', handleSearchFormSubmit);
